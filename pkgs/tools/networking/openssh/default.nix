@@ -3,6 +3,7 @@
 , hpnSupport ? false
 , withKerberos ? true
 , withGssapiPatches ? false
+, withXmss ? false
 , kerberos
 , linkOpenssl? true
 }:
@@ -84,6 +85,7 @@ stdenv.mkDerivation rec {
     (if pam != null then "--with-pam" else "--without-pam")
   ] ++ optional (etcDir != null) "--sysconfdir=${etcDir}"
     ++ optional withKerberos (assert kerberos != null; "--with-kerberos5=${kerberos}")
+    ++ optional withXmss "--with-cppflags=-DWITH_XMSS"
     ++ optional stdenv.isDarwin "--disable-libutil"
     ++ optional (!linkOpenssl) "--without-openssl";
 
