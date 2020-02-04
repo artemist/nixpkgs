@@ -21,9 +21,11 @@
 # optional dependencies
 , libgcrypt ? null # gnomeSupport || cupsSupport
 , libva ? null # useVaapi
+, libdrm ? null, wayland ? null, mesa_drivers ? null, libxkbcommon ? null # useOzone
 
 # package customization
 , useVaapi ? false
+, useOzone ? false
 , gnomeSupport ? false, gnome ? null
 , gnomeKeyringSupport ? false, libgnome-keyring3 ? null
 , proprietaryCodecs ? true
@@ -129,7 +131,8 @@ let
       ++ optionals gnomeSupport [ gnome.GConf libgcrypt ]
       ++ optionals cupsSupport [ libgcrypt cups ]
       ++ optional useVaapi libva
-      ++ optional pulseSupport libpulseaudio;
+      ++ optional pulseSupport libpulseaudio
+      ++ optionals useOzone [ libdrm wayland mesa_drivers libxkbcommon ];
 
     patches = [
       ./patches/nix_plugin_paths_68.patch
@@ -214,6 +217,10 @@ let
       ln -s ${stdenv.cc}/bin/clang              third_party/llvm-build/Release+Asserts/bin/clang
       ln -s ${stdenv.cc}/bin/clang++            third_party/llvm-build/Release+Asserts/bin/clang++
       ln -s ${llvmPackages.llvm}/bin/llvm-ar    third_party/llvm-build/Release+Asserts/bin/llvm-ar
+    '' + optionalString useOzone ''
+      substituteInPlace third_party/wayland/features.gni \
+        --replace 'system_wayland_scanner_path = "/usr/bin/wayland-scanner"' \
+        'system_wayland_scanner_path = "${wayland}/bin/wayland-scanner"'
     '';
 
     gnFlags = mkGnFlags ({
@@ -260,6 +267,16 @@ let
     } // optionalAttrs pulseSupport {
       use_pulseaudio = true;
       link_pulseaudio = true;
+    } // optionalAttrs useOzone {
+      use_ozone = true;
+      ozone_platform_wayland = true;
+      ozone_platform_x11 = true;
+      ozone_auto_platforms = false;
+      use_xkbcommon = true;
+      use_glib = true;
+      use_system_libwayland = true;
+      use_system_minigbm = true;
+      use_system_libdrm = true;
     } // (extraAttrs.gnFlags or {}));
 
     configurePhase = ''
