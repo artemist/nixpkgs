@@ -1,9 +1,9 @@
 diff --git a/src/qml/qml/qqmlimport.cpp b/src/qml/qml/qqmlimport.cpp
-index 005db4248..685c5b1b2 100644
+index 3bf8d807a9..bd3459db2c 100644
 --- a/src/qml/qml/qqmlimport.cpp
 +++ b/src/qml/qml/qqmlimport.cpp
-@@ -1760,6 +1760,15 @@ QQmlImportDatabase::QQmlImportDatabase(QQmlEngine *e)
-     QString installImportsPath =  QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath);
+@@ -1736,6 +1736,15 @@ QQmlImportDatabase::QQmlImportDatabase(QQmlEngine *e)
+     QString installImportsPath = QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath);
      addImportPath(installImportsPath);
  
 +    // Add import paths derived from PATH
@@ -19,7 +19,7 @@ index 005db4248..685c5b1b2 100644
      if (Q_UNLIKELY(!qEnvironmentVariableIsEmpty("QML2_IMPORT_PATH"))) {
          const QString envImportPath = qEnvironmentVariable("QML2_IMPORT_PATH");
 diff --git a/tools/qmlcachegen/qmlcache.prf b/tools/qmlcachegen/qmlcache.prf
-index 537eaf62e..e21de58f6 100644
+index 537eaf62ea..e21de58f64 100644
 --- a/tools/qmlcachegen/qmlcache.prf
 +++ b/tools/qmlcachegen/qmlcache.prf
 @@ -26,7 +26,7 @@ defineReplace(qmlCacheOutputFileName) {

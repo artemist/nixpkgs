@@ -1,6 +1,8 @@
+diff --git a/src/macdeployqt/shared/shared.cpp b/src/macdeployqt/shared/shared.cpp
+index 69d0ce8c..f92e63cd 100644
 --- a/src/macdeployqt/shared/shared.cpp
 +++ b/src/macdeployqt/shared/shared.cpp
-@@ -1241,6 +1241,12 @@ bool deployQmlImports(const QString &appBundlePath, DeploymentInfo deploymentInf
+@@ -1242,6 +1242,12 @@ bool deployQmlImports(const QString &appBundlePath, DeploymentInfo deploymentInf
      if (!QFile(qmlImportScannerPath).exists())
          qmlImportScannerPath = QCoreApplication::applicationDirPath() + "/qmlimportscanner";
  

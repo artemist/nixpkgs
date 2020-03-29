@@ -1,21 +1,8 @@
-From 361a9395704ca1ee170a8bb3823ba860293eecee Mon Sep 17 00:00:00 2001
-From: Thomas Tuegel <ttuegel@mailbox.org>
-Date: Tue, 17 Sep 2019 05:34:00 -0500
-Subject: [PATCH 01/12] qtbase-mkspecs-mac
-
----
- mkspecs/common/mac.conf               |   2 +-
- mkspecs/features/mac/default_post.prf | 202 ----------------------------------
- mkspecs/features/mac/default_pre.prf  |  58 ----------
- mkspecs/features/mac/sdk.mk           |  25 -----
- mkspecs/features/mac/sdk.prf          |  61 ----------
- 5 files changed, 1 insertion(+), 347 deletions(-)
-
 diff --git a/mkspecs/common/mac.conf b/mkspecs/common/mac.conf
-index b77494ec9b..470c38e772 100644
+index 61bea952b2..9909dae726 100644
 --- a/mkspecs/common/mac.conf
 +++ b/mkspecs/common/mac.conf
-@@ -24,7 +24,7 @@ QMAKE_INCDIR_OPENGL     = \
+@@ -23,7 +23,7 @@ QMAKE_INCDIR_OPENGL     = \
  
  QMAKE_FIX_RPATH         = install_name_tool -id
  
@@ -25,17 +12,18 @@ index b77494ec9b..470c38e772 100644
  
  QMAKE_LFLAGS_REL_RPATH  =
 diff --git a/mkspecs/features/mac/default_post.prf b/mkspecs/features/mac/default_post.prf
-index 993f4d56a9..b80ec1e801 100644
+index ba163efc18..b80ec1e801 100644
 --- a/mkspecs/features/mac/default_post.prf
 +++ b/mkspecs/features/mac/default_post.prf
-@@ -68,208 +68,6 @@ qt {
+@@ -68,212 +68,6 @@ qt {
      }
  }
  
 -# Add the same default rpaths as Xcode does for new projects.
 -# This is especially important for iOS/tvOS/watchOS where no other option is possible.
 -!no_default_rpath {
--    QMAKE_RPATHDIR += @executable_path/../Frameworks
+-    uikit: QMAKE_RPATHDIR += @executable_path/Frameworks
+-    else: QMAKE_RPATHDIR += @executable_path/../Frameworks
 -    equals(TEMPLATE, lib):!plugin:lib_bundle: QMAKE_RPATHDIR += @loader_path/Frameworks
 -}
 -
@@ -175,14 +163,17 @@ index 993f4d56a9..b80ec1e801 100644
 -        QMAKE_CXXFLAGS += $(EXPORT_QMAKE_XARCH_CFLAGS)
 -        QMAKE_LFLAGS += $(EXPORT_QMAKE_XARCH_LFLAGS)
 -    } else {
--        simulator: \
+-        simulator {
 -            version_identifier = $$simulator.deployment_identifier
--        else: \
+-            sysroot_path  = $$xcodeSDKInfo(Path, $$simulator.sdk)
+-        } else {
 -            version_identifier = $$device.deployment_identifier
+-            sysroot_path  = $$xcodeSDKInfo(Path, $$device.sdk)
+-        }
 -        version_min_flag = -m$${version_identifier}-version-min=$$deployment_target
--        QMAKE_CFLAGS += -isysroot $$QMAKE_MAC_SDK_PATH $$version_min_flag
--        QMAKE_CXXFLAGS += -isysroot $$QMAKE_MAC_SDK_PATH $$version_min_flag
--        QMAKE_LFLAGS += -Wl,-syslibroot,$$QMAKE_MAC_SDK_PATH $$version_min_flag
+-        QMAKE_CFLAGS += -isysroot $$sysroot_path $$version_min_flag
+-        QMAKE_CXXFLAGS += -isysroot $$sysroot_path $$version_min_flag
+-        QMAKE_LFLAGS += -Wl,-syslibroot,$$sysroot_path $$version_min_flag
 -    }
 -
 -    # Enable precompiled headers for multiple architectures
@@ -303,11 +294,11 @@ index e3534561a5..3b01424e67 100644
 -xcode_copy_phase_strip_setting.value = NO
 -QMAKE_MAC_XCODE_SETTINGS += xcode_copy_phase_strip_setting
 diff --git a/mkspecs/features/mac/sdk.mk b/mkspecs/features/mac/sdk.mk
-index c40f58c987..e69de29bb2 100644
+index c40f58c987..8b13789179 100644
 --- a/mkspecs/features/mac/sdk.mk
 +++ b/mkspecs/features/mac/sdk.mk
-@@ -1,25 +0,0 @@
--
+@@ -1,25 +1 @@
+ 
 -ifeq ($(QT_MAC_SDK_NO_VERSION_CHECK),)
 -    CHECK_SDK_COMMAND = /usr/bin/xcrun --sdk $(EXPORT_QMAKE_MAC_SDK) -show-sdk-version 2>&1
 -    CURRENT_MAC_SDK_VERSION := $(shell DEVELOPER_DIR=$(EXPORT_QMAKE_XCODE_DEVELOPER_PATH) $(CHECK_SDK_COMMAND))
@@ -398,6 +389,3 @@ index 3a9c2778bb..e69de29bb2 100644
 -    $$tool = $$sysrooted $$member(value, 1, -1)
 -    cache($$tool_variable, set stash, $$tool)
 -}
--- 
-2.23.GIT
-
