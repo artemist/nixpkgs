@@ -1,0 +1,13 @@
+diff --git a/configure.pri b/configure.pri
+index 3a144e3f..fa301918 100644
+--- a/configure.pri
++++ b/configure.pri
+@@ -41,7 +41,7 @@ defineTest(qtConfTest_detectJumboBuild) {
+ 
+ defineTest(qtConfReport_skipBuildWarning) {
+     $${1}()
+-    !isEmpty(skipBuildReason):qtConfAddWarning($${skipBuildReason})
++    !isEmpty(skipBuildReason):error($${skipBuildReason})
+ }
+ 
+ defineTest(qtConfReport_jumboBuild) {
