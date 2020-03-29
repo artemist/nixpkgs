@@ -62,31 +62,16 @@ let
         ./qtbase.patch.d/0005-qtbase-cmake.patch
         ./qtbase.patch.d/0006-qtbase-gtk3.patch
         ./qtbase.patch.d/0007-qtbase-xcursor.patch
-        ./qtbase.patch.d/0008-qtbase-xcompose.patch
         ./qtbase.patch.d/0009-qtbase-tzdir.patch
         ./qtbase.patch.d/0010-qtbase-qtpluginpath.patch
         ./qtbase.patch.d/0011-qtbase-assert.patch
         ./qtbase.patch.d/0012-fix-header_module.patch
-        # https://bugreports.qt.io/browse/QTBUG-81715
-        # remove after updating to qt > 5.12.7
-        (fetchpatch {
-          name = "fix-qt5_make_output_file-cmake-macro.patch";
-          url = "https://code.qt.io/cgit/qt/qtbase.git/patch/?id=8a3fde00bf53d99e9e4853e8ab97b0e1bcf74915";
-          sha256 = "1gpcbdpyazdxnmldvhsf3pfwr2gjvi08x3j6rxf543rq01bp6cpx";
-        })
       ];
     qtdeclarative = [ ./qtdeclarative.patch ];
     qtscript = [ ./qtscript.patch ];
     qtserialport = [ ./qtserialport.patch ];
     qtwebengine = [
       ./qtwebengine-no-build-skip.patch
-      # https://gitlab.freedesktop.org/pulseaudio/pulseaudio/issues/707
-      # https://bugreports.qt.io/browse/QTBUG-77037
-      (fetchpatch {
-        name = "fix-build-with-pulseaudio-13.0.patch";
-        url = "https://git.archlinux.org/svntogit/packages.git/plain/trunk/qtbug-77037-workaround.patch?h=packages/qt5-webengine&id=fc77d6b3d5ec74e421b58f199efceb2593cbf951";
-        sha256 = "1gv733qfdn9746nbqqxzyjx4ijjqkkb7zb71nxax49nna5bri3am";
-      })
     ]
       ++ optional stdenv.isDarwin ./qtwebengine-darwin-no-platform-check.patch;
     qtwebkit = [ ./qtwebkit.patch ]

@@ -1,5 +1,5 @@
 diff --git a/src/plugins/platforms/cocoa/qiosurfacegraphicsbuffer.mm b/src/plugins/platforms/cocoa/qiosurfacegraphicsbuffer.mm
-index a367487e..c3aeca1d 100644
+index fc187e0f51..2cf83ef052 100644
 --- a/src/plugins/platforms/cocoa/qiosurfacegraphicsbuffer.mm
 +++ b/src/plugins/platforms/cocoa/qiosurfacegraphicsbuffer.mm
 @@ -49,6 +49,11 @@

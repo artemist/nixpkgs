@@ -1,51 +1,39 @@
-From 6f53835deae80b28ec5c1c9a5c0294bbcc87f91b Mon Sep 17 00:00:00 2001
-From: Thomas Tuegel <ttuegel@mailbox.org>
-Date: Tue, 17 Sep 2019 05:34:28 -0500
-Subject: [PATCH 05/12] qtbase-cmake
-
----
- mkspecs/features/data/cmake/Qt5BasicConfig.cmake.in  |  2 +-
- mkspecs/features/data/cmake/Qt5PluginTarget.cmake.in |  4 ++--
- src/corelib/Qt5CoreConfigExtras.cmake.in             | 10 +++++-----
- src/corelib/Qt5CoreConfigExtrasMkspecDir.cmake.in    |  2 +-
- .../Qt5CoreConfigExtrasMkspecDirForInstall.cmake.in  |  2 +-
- src/dbus/Qt5DBusConfigExtras.cmake.in                | 12 ++----------
- src/gui/Qt5GuiConfigExtras.cmake.in                  |  6 +++---
- src/widgets/Qt5WidgetsConfigExtras.cmake.in          |  2 +-
- 8 files changed, 16 insertions(+), 24 deletions(-)
-
 diff --git a/mkspecs/features/data/cmake/Qt5BasicConfig.cmake.in b/mkspecs/features/data/cmake/Qt5BasicConfig.cmake.in
-index c60ef16e64..e354ab9156 100644
+index 50364765fb..eeafc854f8 100644
 --- a/mkspecs/features/data/cmake/Qt5BasicConfig.cmake.in
 +++ b/mkspecs/features/data/cmake/Qt5BasicConfig.cmake.in
-@@ -278,7 +278,7 @@ if (NOT TARGET Qt5::$${CMAKE_MODULE_NAME})
-     macro(_populate_$${CMAKE_MODULE_NAME}_plugin_properties Plugin Configuration PLUGIN_LOCATION)
+@@ -542,11 +542,7 @@ if (NOT TARGET Qt5::$${CMAKE_MODULE_NAME})
+           IsDebugAndRelease)
          set_property(TARGET Qt5::${Plugin} APPEND PROPERTY IMPORTED_CONFIGURATIONS ${Configuration})
  
+-!!IF isEmpty(CMAKE_PLUGIN_DIR_IS_ABSOLUTE)
+-        set(imported_location \"${_qt5$${CMAKE_MODULE_NAME}_install_prefix}/$${CMAKE_PLUGIN_DIR}${PLUGIN_LOCATION}\")
+-!!ELSE
 -        set(imported_location \"$${CMAKE_PLUGIN_DIR}${PLUGIN_LOCATION}\")
+-!!ENDIF
 +        set(imported_location \"${PLUGIN_LOCATION}\")
          _qt5_$${CMAKE_MODULE_NAME}_check_file_exists(${imported_location})
          set_target_properties(Qt5::${Plugin} PROPERTIES
              \"IMPORTED_LOCATION_${Configuration}\" ${imported_location}
 diff --git a/mkspecs/features/data/cmake/Qt5PluginTarget.cmake.in b/mkspecs/features/data/cmake/Qt5PluginTarget.cmake.in
-index 5baf0fdb10..3583745aea 100644
+index 7b70cfed09..e700cfa539 100644
 --- a/mkspecs/features/data/cmake/Qt5PluginTarget.cmake.in
 +++ b/mkspecs/features/data/cmake/Qt5PluginTarget.cmake.in
-@@ -2,10 +2,10 @@
- add_library(Qt5::$$CMAKE_PLUGIN_NAME MODULE IMPORTED)
+@@ -53,10 +53,10 @@ set_property(TARGET Qt5::$$CMAKE_PLUGIN_NAME PROPERTY INTERFACE_SOURCES
+ !!ENDIF
  
  !!IF !isEmpty(CMAKE_RELEASE_TYPE)
--_populate_$${CMAKE_MODULE_NAME}_plugin_properties($$CMAKE_PLUGIN_NAME RELEASE \"$${CMAKE_PLUGIN_LOCATION_RELEASE}\")
-+_populate_$${CMAKE_MODULE_NAME}_plugin_properties($$CMAKE_PLUGIN_NAME RELEASE \"$${CMAKE_PLUGIN_DIR}$${CMAKE_PLUGIN_LOCATION_RELEASE}\")
+-_populate_$${CMAKE_MODULE_NAME}_plugin_properties($$CMAKE_PLUGIN_NAME RELEASE \"$${CMAKE_PLUGIN_LOCATION_RELEASE}\" $${CMAKE_DEBUG_AND_RELEASE})
++_populate_$${CMAKE_MODULE_NAME}_plugin_properties($$CMAKE_PLUGIN_NAME RELEASE \"$${CMAKE_PLUGIN_DIR}$${CMAKE_PLUGIN_LOCATION_RELEASE}\" $${CMAKE_DEBUG_AND_RELEASE})
  !!ENDIF
  !!IF !isEmpty(CMAKE_DEBUG_TYPE)
--_populate_$${CMAKE_MODULE_NAME}_plugin_properties($$CMAKE_PLUGIN_NAME DEBUG \"$${CMAKE_PLUGIN_LOCATION_DEBUG}\")
-+_populate_$${CMAKE_MODULE_NAME}_plugin_properties($$CMAKE_PLUGIN_NAME DEBUG \"$${CMAKE_PLUGIN_DIR}$${CMAKE_PLUGIN_LOCATION_DEBUG}\")
+-_populate_$${CMAKE_MODULE_NAME}_plugin_properties($$CMAKE_PLUGIN_NAME DEBUG \"$${CMAKE_PLUGIN_LOCATION_DEBUG}\" $${CMAKE_DEBUG_AND_RELEASE})
++_populate_$${CMAKE_MODULE_NAME}_plugin_properties($$CMAKE_PLUGIN_NAME DEBUG \"$${CMAKE_PLUGIN_DIR}$${CMAKE_PLUGIN_LOCATION_DEBUG}\" $${CMAKE_DEBUG_AND_RELEASE})
  !!ENDIF
  
  list(APPEND Qt5$${CMAKE_MODULE_NAME}_PLUGINS Qt5::$$CMAKE_PLUGIN_NAME)
 diff --git a/src/corelib/Qt5CoreConfigExtras.cmake.in b/src/corelib/Qt5CoreConfigExtras.cmake.in
-index e0652fdcf9..450b2a2d28 100644
+index 9b672327ef..319ba94d6d 100644
 --- a/src/corelib/Qt5CoreConfigExtras.cmake.in
 +++ b/src/corelib/Qt5CoreConfigExtras.cmake.in
 @@ -3,7 +3,7 @@ if (NOT TARGET Qt5::qmake)
@@ -75,7 +63,7 @@ index e0652fdcf9..450b2a2d28 100644
  !!ELSE
      set(imported_location \"$${CMAKE_BIN_DIR}rcc$$CMAKE_BIN_SUFFIX\")
  !!ENDIF
-@@ -116,7 +116,7 @@ if (NOT TARGET Qt5::WinMain)
+@@ -118,7 +118,7 @@ if (NOT TARGET Qt5::WinMain)
  !!IF !isEmpty(CMAKE_RELEASE_TYPE)
      set_property(TARGET Qt5::WinMain APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
  !!IF isEmpty(CMAKE_LIB_DIR_IS_ABSOLUTE)
@@ -84,7 +72,7 @@ index e0652fdcf9..450b2a2d28 100644
  !!ELSE
      set(imported_location \"$${CMAKE_LIB_DIR}$${CMAKE_WINMAIN_FILE_LOCATION_RELEASE}\")
  !!ENDIF
-@@ -130,7 +130,7 @@ if (NOT TARGET Qt5::WinMain)
+@@ -132,7 +132,7 @@ if (NOT TARGET Qt5::WinMain)
      set_property(TARGET Qt5::WinMain APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
  
  !!IF isEmpty(CMAKE_LIB_DIR_IS_ABSOLUTE)
@@ -189,6 +177,3 @@ index 99d87e2e46..a4eab2aa72 100644
  !!ELSE
      set(imported_location \"$${CMAKE_BIN_DIR}uic$$CMAKE_BIN_SUFFIX\")
  !!ENDIF
--- 
-2.23.GIT
-
