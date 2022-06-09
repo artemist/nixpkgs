@@ -26047,6 +26047,8 @@ with pkgs;
 
   expenses = callPackage ../applications/misc/expenses { };
 
+  fex-emu = callPackage ../applications/virtualization/fex-emu { };
+
   fnott = callPackage ../applications/misc/fnott { };
 
   furnace = callPackage ../applications/audio/furnace {
