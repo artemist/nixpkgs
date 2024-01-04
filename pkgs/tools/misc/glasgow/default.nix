@@ -9,33 +9,31 @@
 
 python3.pkgs.buildPythonApplication rec {
   pname = "glasgow";
-  version = "unstable-2023-09-20";
-  # python -m setuptools_scm
-  realVersion = "0.1.dev1798+g${lib.substring 0 7 src.rev}";
+  version = "0.1-dev20231223+${lib.substring 0 7 src.rev}";
+
+  format = "pyproject";
 
   src = fetchFromGitHub {
     owner = "GlasgowEmbedded";
     repo = "glasgow";
-    rev = "e9a9801d5be3dcba0ee188dd8a6e9115e337795d";
-    sha256 = "sha256-ztB3I/jrDSm1gKB1e5igivUVloq+YYhkshDlWg75NMA=";
+    rev = "ebd3ba3c68248dcad09f1af8d7809db89b119468";
+    sha256 = "sha256-UFfnDZta/R8ElVbEbRle1muVbpeE/JdFJ/D8cA0VFHs=";
   };
 
   nativeBuildInputs = [
-    python3.pkgs.setuptools-scm
+    python3.pkgs.pdm-backend
+    python3.pkgs.unittestCheckHook
     sdcc
   ];
 
   propagatedBuildInputs = with python3.pkgs; [
     aiohttp
     amaranth
-    appdirs
-    bitarray
-    crc
     fx2
     libusb1
     packaging
+    platformdirs
     pyvcd
-    setuptools
   ];
 
   nativeCheckInputs = [ yosys icestorm nextpnr ];
@@ -46,7 +44,7 @@ python3.pkgs.buildPythonApplication rec {
     make -C firmware LIBFX2=${python3.pkgs.fx2}/share/libfx2
     cp firmware/glasgow.ihex software/glasgow
     cd software
-    export SETUPTOOLS_SCM_PRETEND_VERSION="${realVersion}"
+    export SETUPTOOLS_SCM_PRETEND_VERSION="${version}"
   '';
 
   # installCheck tries to build_ext again
@@ -54,16 +52,16 @@ python3.pkgs.buildPythonApplication rec {
 
   postInstall = ''
     mkdir -p $out/etc/udev/rules.d
-    cp $src/config/99-glasgow.rules $out/etc/udev/rules.d
+    cp $src/config/70-glasgow.rules $out/etc/udev/rules.d
+    cp $src/config/70-cypress.rules $out/etc/udev/rules.d
   '';
 
-  checkPhase = ''
+  preCheck = ''
     # tests attempt to cache bitstreams
     # for linux:
     export XDG_CACHE_HOME=$TMPDIR
     # for darwin:
     export HOME=$TMPDIR
-    ${python3.interpreter} -W ignore::DeprecationWarning test.py
   '';
 
   makeWrapperArgs = [
