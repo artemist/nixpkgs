@@ -5,19 +5,17 @@
   cmake,
   ninja,
   pkg-config,
+  nasm,
   python3,
   SDL2,
   libepoxy,
   openssl,
   squashfsTools,
   squashfuse,
-  pkgsCross,
-  pkgs,
 }:
 
 let
   stdenv = llvmPackages.stdenv;
-  x64Pkgs = if stdenv.hostPlatform.system == "x86_64-linux" then pkgs else pkgsCross.gnu64;
 in
 stdenv.mkDerivation rec {
   pname = "fex-emu";
@@ -35,9 +33,12 @@ stdenv.mkDerivation rec {
     cmake
     ninja
     pkg-config
+
     python3
+    python3.pkgs.setuptools
+
     stdenv.cc.cc.libllvm.out
-    x64Pkgs.nasm
+    nasm
   ];
 
   buildInputs = [
@@ -56,7 +57,6 @@ stdenv.mkDerivation rec {
 
   cmakeFlags = [
     "-DOVERRIDE_VERSION=${version}"
-    "-DCMAKE_BUILD_TYPE=Release"
     "-DENABLE_LTO=True"
   ];
 
