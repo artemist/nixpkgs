@@ -1,0 +1,52 @@
+diff --git a/ThunkLibs/Generator/main.cpp b/ThunkLibs/Generator/main.cpp
+index d238fc1ea..153561b22 100644
+--- a/ThunkLibs/Generator/main.cpp
++++ b/ThunkLibs/Generator/main.cpp
+@@ -4,6 +4,8 @@
+ #include "llvm/Support/Signals.h"
+ 
+ #include <iostream>
++#include <iterator>
++#include <sstream>
+ #include <string>
+ 
+ #include "interface.h"
+@@ -14,6 +16,17 @@ void print_usage(const char* program_name) {
+     std::cerr << "Usage: " << program_name << " <filename> <libname> <gen_target> <output_filename> -- <clang_flags>\n";
+ }
+ 
++void append_environment_args(const char *var, clang::tooling::CommandLineArguments& args) {
++    auto env = std::getenv(var);
++    if (!env) return;
++
++    std::string str(env);
++    std::stringstream ss(str);
++    std::istream_iterator<std::string> begin(ss);
++    std::istream_iterator<std::string> end;
++    args.insert(args.end(), begin, end);
++}
++
+ int main(int argc, char* const argv[]) {
+     llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
+ 
+@@ -58,6 +71,7 @@ int main(int argc, char* const argv[]) {
+         auto set_resource_directory = [](const clang::tooling::CommandLineArguments &Args, clang::StringRef) {
+             clang::tooling::CommandLineArguments AdjustedArgs = Args;
+             AdjustedArgs.push_back(std::string { "-resource-dir=" } + CLANG_RESOURCE_DIR);
++            append_environment_args("THUNKGEN_HOST_ARGS", AdjustedArgs);
+             return AdjustedArgs;
+         };
+         Tool.appendArgumentsAdjuster(set_resource_directory);
+@@ -76,7 +90,11 @@ int main(int argc, char* const argv[]) {
+             }
+             AdjustedArgs.push_back(std::string { "--target=" } + platform + "-linux-unknown");
+             AdjustedArgs.push_back("-isystem");
+-            AdjustedArgs.push_back(std::string { "/usr/" } + platform + "-linux-gnu/include/");
++            if (is_32bit_guest) {
++                append_environment_args("THUNKGEN_GUEST_32_ARGS", AdjustedArgs);
++            } else {
++                append_environment_args("THUNKGEN_GUEST_64_ARGS", AdjustedArgs);
++            }
+             AdjustedArgs.push_back("-DGUEST_THUNK_LIBRARY");
+             return AdjustedArgs;
+         };

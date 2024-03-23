@@ -26,7 +26,31 @@
 
 let
   stdenv = llvmPackages.stdenv;
-  crossGcc = pkgsCross.gnu64.buildPackages.gcc;
+  crossGcc32 = pkgsCross.gnu32.buildPackages.gcc;
+  crossGcc64 = pkgsCross.gnu64.buildPackages.gcc;
+  thunkDeps = [
+    alsa-lib
+    libdrm
+    libglvnd
+    vulkan-headers
+    wayland
+    xorg.libX11
+    xorg.libXau
+    xorg.libXdmcp
+    xorg.libXext
+    xorg.libXfixes
+    xorg.libXrandr
+    xorg.libXrender
+    xorg.libxcb
+    xorg.libxshmfence
+    xorg.xorgproto
+    xorg.xtrans
+  ];
+
+  thunkDepIncludeFlags = lib.concatStringsSep " "
+    (map (pkg: "-I${lib.getDev pkg}/include") thunkDeps);
+  thunkDepLibFlags = lib.concatStringsSep " "
+    (map (pkg: "-L${lib.getLib pkg}/lib") thunkDeps);
 in
 stdenv.mkDerivation rec {
   pname = "fex-emu";
@@ -55,34 +79,43 @@ stdenv.mkDerivation rec {
   buildInputs = [
     SDL2
     libepoxy
-    openssl
     libffi
-    ncurses
     libxml2
+    ncurses
+    openssl
     zlib
-  ] ++ lib.optionals buildThunks [
-    alsa-lib
-    libdrm
-    libglvnd
-    vulkan-headers
-    wayland
-    xorg.libX11
-    xorg.libXau
-    xorg.libXdmcp
-    xorg.libXext
-    xorg.libXrender
-    xorg.libXfixes
-    xorg.libxcb
-    xorg.libxshmfence
-  ];
+  ] ++ lib.optionals buildThunks thunkDeps;
+
+  patches = lib.optional buildThunks ./thunkgen-cflags-environment.patch;
 
   preConfigure = ''
     export AR=llvm-ar
     export RANLIB=llvm-ranlib
     export STRIP=llvm-strip
   '' + lib.optionalString buildThunks ''
-    substituteInPlace toolchain_x86_{32,64}.cmake \
-      --replace x86_64-linux-gnu- ${crossGcc}/bin/${crossGcc.targetPrefix}
+    substituteInPlace toolchain_x86_32.cmake \
+      --replace x86_64-linux-gnu- ${crossGcc32}/bin/${crossGcc32.targetPrefix}
+
+    substituteInPlace toolchain_x86_64.cmake \
+      --replace x86_64-linux-gnu- ${crossGcc64}/bin/${crossGcc64.targetPrefix}
+
+    THUNKGEN_HOST_ARGS="${thunkDepIncludeFlags} ${thunkDepLibFlags}"
+    THUNKGEN_HOST_ARGS+=" $(< ${stdenv.cc}/nix-support/cc-cflags)"
+    THUNKGEN_HOST_ARGS+=" $(< ${stdenv.cc}/nix-support/libc-cflags)"
+    THUNKGEN_HOST_ARGS+=" $(< ${stdenv.cc}/nix-support/libcxx-cxxflags)"
+    export THUNKGEN_HOST_ARGS
+
+    THUNKGEN_GUEST_32_ARGS="${thunkDepIncludeFlags}"
+    THUNKGEN_GUEST_32_ARGS+=" $(< ${crossGcc32}/nix-support/cc-cflags)"
+    THUNKGEN_GUEST_32_ARGS+=" $(< ${crossGcc32}/nix-support/libc-cflags)"
+    THUNKGEN_GUEST_32_ARGS+=" $(< ${crossGcc32}/nix-support/libcxx-cxxflags)"
+    export THUNKGEN_GUEST_32_ARGS
+
+    THUNKGEN_GUEST_64_ARGS="${thunkDepIncludeFlags}"
+    THUNKGEN_GUEST_64_ARGS+=" $(< ${crossGcc64}/nix-support/cc-cflags)"
+    THUNKGEN_GUEST_64_ARGS+=" $(< ${crossGcc64}/nix-support/libc-cflags)"
+    THUNKGEN_GUEST_64_ARGS+=" $(< ${crossGcc64}/nix-support/libcxx-cxxflags)"
+    export THUNKGEN_GUEST_64_ARGS
   '';
 
   env = lib.optionalAttrs buildThunks {
@@ -90,7 +123,8 @@ stdenv.mkDerivation rec {
     # Ordinarily, this would be in depsBuildBuild but
     # doing so sets our compiler to be clang-unwrapped,
     # so put the include here.
-    NIX_CFLAGS_COMPILE = "-I${llvmPackages.libllvm.dev}/include";
+    # clang won't give us __neon_vector_type__ without -march
+    NIX_CFLAGS_COMPILE = "-I${llvmPackages.libllvm.dev}/include -march=armv8-a";
   };
 
   cmakeFlags = [
