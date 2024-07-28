@@ -1,4 +1,5 @@
 {
+  stdenv,
   lib,
   mkDerivation,
   buildPackages,
@@ -14,6 +15,8 @@ mkDerivation {
     "contrib/libc-vis"
     "etc/mtree/BSD.include.dist"
     "sys"
+  ] ++ lib.optionals stdenv.isAarch64 [
+    "lib/msun/arm"
   ];
 
   extraNativeBuildInputs = [

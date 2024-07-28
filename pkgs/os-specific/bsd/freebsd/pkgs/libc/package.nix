@@ -106,6 +106,8 @@ mkDerivation {
       "include/paths.h"
 
       "lib/libdl"
+    ] ++ lib.optionals stdenv.hostPlatform.isAarch64 [
+      "contrib/arm-optimized-routines"
     ];
 
   postPatch = ''
@@ -173,6 +175,10 @@ mkDerivation {
   preBuild = lib.optionalString (stdenv.hostPlatform.isx86_32) ''
     make -C $BSDSRCDIR/lib/libssp_nonshared $makeFlags
     make -C $BSDSRCDIR/lib/libssp_nonshared $makeFlags install
+  '' + ''
+      mkdir $BSDSRCDIR/lib/libcompiler_rt/i386 $BSDSRCDIR/lib/libcompiler_rt/cpu_model
+      make -C $BSDSRCDIR/lib/libcompiler_rt $makeFlags
+      make -C $BSDSRCDIR/lib/libcompiler_rt $makeFlags install
   '';
 
   postInstall =
@@ -186,10 +192,6 @@ mkDerivation {
       find . -type d -exec mkdir -p $out/\{} \;
       find . \( -type f -o -type l \) -exec cp -pr \{} $out/\{} \;
       popd
-
-      mkdir $BSDSRCDIR/lib/libcompiler_rt/i386 $BSDSRCDIR/lib/libcompiler_rt/cpu_model
-      make -C $BSDSRCDIR/lib/libcompiler_rt $makeFlags
-      make -C $BSDSRCDIR/lib/libcompiler_rt $makeFlags install
 
       make -C $BSDSRCDIR/lib/libgcc_eh $makeFlags
       make -C $BSDSRCDIR/lib/libgcc_eh $makeFlags install

@@ -14,6 +14,7 @@
 , libllvm
 , linuxHeaders
 , libxcrypt
+, freebsd
 
 # Some platforms have switched to using compiler-rt, but still want a
 # libgcc.a for ABI compat purposes. The use case would be old code that
@@ -63,7 +64,8 @@ stdenv.mkDerivation ({
     ++ [ python3 libllvm.dev ]
     ++ lib.optional stdenv.isDarwin xcbuild.xcrun;
   buildInputs =
-    lib.optional (stdenv.hostPlatform.isLinux && stdenv.hostPlatform.isRiscV) linuxHeaders;
+    (lib.optional (stdenv.hostPlatform.isLinux && stdenv.hostPlatform.isRiscV) linuxHeaders)
+    ++ lib.optional (stdenv.hostPlatform.isFreeBSD && stdenv.hostPlatform.isAarch64) freebsd.include;
 
   env.NIX_CFLAGS_COMPILE = toString ([
     "-DSCUDO_DEFAULT_OPTIONS=DeleteSizeMismatch=0:DeallocationTypeMismatch=0"
