@@ -106,7 +106,7 @@ mkDerivation {
       "include/paths.h"
 
       "lib/libdl"
-    ] ++ lib.optionals stdenv.hostPlatform.isAarch64 [
+    ] ++ lib.optionals stdenv.hostPlatform.isAarch [
       "contrib/arm-optimized-routines"
     ];
 
@@ -262,8 +262,11 @@ mkDerivation {
       $CC -c $BSDSRCDIR/contrib/llvm-project/compiler-rt/lib/builtins/udivdi3.c -o $BSDSRCDIR/contrib/llvm-project/compiler-rt/lib/builtins/udivdi3.o
       ORIG_NIX_LDFLAGS="$NIX_LDFLAGS"
       NIX_LDFLAGS+=" $BSDSRCDIR/contrib/llvm-project/compiler-rt/lib/builtins/udivdi3.o"
-    ''
-    + ''
+    '' + lib.optionalString stdenv.hostPlatform.isAarch32 ''
+      # The Makefile has a `LIBADD += compiler_rt` but it doesn't work for some reason.
+      # compiler_rt only seems to actually be needed on AArch32
+      NIX_LDFLAGS+=" -lcompiler_rt"
+    '' + ''
       make -C $BSDSRCDIR/libexec/rtld-elf $makeFlags
       make -C $BSDSRCDIR/libexec/rtld-elf $makeFlags install
       rm -f $out/libexec/ld-elf.so.1

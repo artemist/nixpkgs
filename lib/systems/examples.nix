@@ -327,6 +327,11 @@ rec {
 
   # BSDs
 
+  armv7l-freebsd = {
+    config = "armv7l-unknown-freebsd-gnueabihf";
+    useLLVM = true;
+  };
+
   aarch64-freebsd = {
     config = "aarch64-unknown-freebsd";
     useLLVM = true;

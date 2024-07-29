@@ -24,7 +24,7 @@ mkDerivation {
     "lib/flua"
     "stand"
     "sys"
-  ] ++ lib.optionals stdenv.hostPlatform.isAarch64 [
+  ] ++ lib.optionals stdenv.hostPlatform.isAarch [
     "lib/libfdt"
   ];
   extraNativeBuildInputs = [ vtfontcvt ];
@@ -47,7 +47,7 @@ mkDerivation {
     make -C $BSDSRCDIR/stand/libsa $makeFlags
     make -C $BSDSRCDIR/stand/ficl $makeFlags
     make -C $BSDSRCDIR/stand/liblua $makeFlags
-  '' + lib.optionalString stdenv.hostPlatform.isAarch64 ''
+  '' + lib.optionalString stdenv.hostPlatform.isAarch ''
     make -C $BSDSRCDIR/stand/fdt $makeFlags
   '';
 

@@ -49,8 +49,8 @@
       i486 = "i386";
       i586 = "i386";
       i686 = "i386";
-      armv6l = "armv6";
-      armv7l = "armv7";
+      armv6l = "arm";
+      armv7l = "arm";
       powerpc = "powerpc";
       powerpc64 = "powerpc";
       powerpc64le = "powerpc";
