@@ -1,5 +1,5 @@
 useOpenBSDCompat () {
-  export NIX_CFLAGS_COMPILE_@suffixSalt@+="-isystem @compat@/include"
+  export NIX_CFLAGS_COMPILE_@suffixSalt@+="-I@compat@/include"
 }
 
 postHooks+=(useOpenBSDCompat)

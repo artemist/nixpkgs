@@ -1,5 +1,4 @@
 #pragma once
-
 #include_next <unistd.h>
 
 // Reimplementing pledge and unvail with seccomp would be a pain,
